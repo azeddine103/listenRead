@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Koran Web-App</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; padding: 20px; display: flex; justify-content: center; }
+        .card { background: white; width: 100%; max-width: 500px; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
+        select, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; font-size: 16px; }
+        button { background: #27ae60; color: white; border: none; font-weight: bold; cursor: pointer; }
+        button:hover { background: #219150; }
+        .verse-box { margin-top: 30px; padding: 20px; border-top: 2px solid #eee; }
+        .arabic { font-size: 30px; color: #2c3e50; direction: rtl; margin-bottom: 15px; font-family: "Amiri", serif; line-height: 1.6; }
+        .german { font-size: 18px; color: #555; line-height: 1.4; }
+        #status { font-size: 14px; margin-bottom: 10px; color: #666; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>📖 Koran Player</h2>
+    <div id="status">Bereit</div>
+    
+    <select id="surahSelect"><option>Lade Suren...</option></select>
+    <button id="loadBtn">Abspielen & Anzeigen</button>
+
+    <audio id="quranAudio" controls style="width: 100%; margin-top: 15px;"></audio>
+
+    <div class="verse-box" id="verseBox">
+        <p class="arabic" id="arabicText">Bitte eine Sure wählen</p>
+        <p class="german" id="germanText"></p>
+    </div>
+</div>
+
+<script>
+    const surahSelect = document.getElementById('surahSelect');
+    const loadBtn = document.getElementById('loadBtn');
+    const statusDiv = document.getElementById('status');
+    const arabicP = document.getElementById('arabicText');
+    const germanP = document.getElementById('germanText');
+    const audio = document.getElementById('quranAudio');
+
+    // 1. Suren-Liste beim Start laden
+    async function init() {
+        try {
+            const res = await fetch('https://api.quran.com/api/v4/chapters?language=de');
+            const data = await res.json();
+            surahSelect.innerHTML = data.chapters.map(s => 
+                `<option value="${s.id}">${s.id}. ${s.name_simple} (${s.translated_name.name})</option>`
+            ).join('');
+            statusDiv.innerText = "Suren geladen.";
+        } catch (e) {
+            statusDiv.innerText = "Fehler beim Laden der Surenliste.";
+        }
+    }
+
+    // 2. Daten laden und abspielen
+    loadBtn.addEventListener('click', async () => {
+        const id = surahSelect.value;
+        statusDiv.innerText = "Lade Vers 1...";
+        statusDiv.style.color = "black";
+
+        try {
+            // Audio-URL (Alafasy)
+            audio.src = `https://download.quranicaudio.com/quran/mishari_rashid_alafasy/${id.padStart(3, '0')}.mp3`;
+            
+            // API Abfrage für Text & Übersetzung (ID 12 = Bubenheim)
+            const res = await fetch(`https://api.quran.com/api/v4/verses/by_chapter/${id}?translations=12&language=de&fields=text_uthmani`);
+            const data = await res.json();
+
+            if (data.verses && data.verses.length > 0) {
+                const v = data.verses[0];
+                
+                // Text setzen
+                arabicP.innerText = v.text_uthmani;
+                germanP.innerText = v.translations[0].text.replace(/<[^>]*>?/gm, '');
+                
+                statusDiv.innerText = "Spiele Sure " + id;
+                audio.play();
+            } else {
+                throw new Error("Keine Daten erhalten");
+            }
+
+        } catch (err) {
+            console.error(err);
+            statusDiv.innerText = "Fehler: " + err.message;
+            statusDiv.style.color = "red";
+        }
+    });
+
+    init();
+</script>
+
+</body>
+</html>
