@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Koran Sync V13</title>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d1117;
+            --card: #161b22;
+            --border: #21262d;
+            --gold: #c9a84c;
+            --gold-glow: rgba(201,168,76,0.35);
+            --text: #e6edf3;
+            --muted: #8b949e;
+            --green: #1a7a3a;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Crimson Pro', Georgia, serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 30px 16px 60px;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 40% at 20% 10%, rgba(201,168,76,0.05) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 60% at 80% 90%, rgba(26,122,58,0.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .wrapper {
+            width: 100%;
+            max-width: 560px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 28px;
+            padding-bottom: 22px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .bismillah {
+            font-family: 'Amiri', serif;
+            font-size: 28px;
+            color: var(--gold);
+            direction: rtl;
+            margin-bottom: 12px;
+            text-shadow: 0 0 30px var(--gold-glow);
+        }
+
+        .title {
+            font-size: 12px;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--muted);
+            font-weight: 300;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        select {
+            flex: 1;
+            padding: 11px 14px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 15px;
+            font-family: 'Crimson Pro', serif;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        select:hover, select:focus { border-color: var(--gold); }
+
+        .load-btn {
+            padding: 11px 22px;
+            background: var(--green);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: 'Crimson Pro', serif;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            white-space: nowrap;
+        }
+
+        .load-btn:hover { background: #1f9444; }
+        .load-btn:active { transform: scale(0.98); }
+        .load-btn:disabled { background: #2d3d30; color: var(--muted); cursor: not-allowed; }
+
+        .status {
+            font-size: 12px;
+            color: var(--muted);
+            text-align: center;
+            margin-bottom: 16px;
+            min-height: 18px;
+            letter-spacing: 0.04em;
+        }
+        .status.active { color: var(--gold); }
+        .status.error  { color: #f85149; }
+        .status.warn   { color: #e3b341; }
+
+        audio {
+            width: 100%;
+            margin-bottom: 24px;
+            accent-color: var(--gold);
+            height: 36px;
+            border-radius: 8px;
+        }
+
+        .verse-display {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 40px 32px;
+            min-height: 240px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .verse-display::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+
+        .verse-number-badge {
+            font-size: 11px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 24px;
+            opacity: 0.8;
+        }
+
+        .arabic {
+            font-family: 'Amiri', serif;
+            font-size: 32px;
+            color: #fff;
+            direction: rtl;
+            line-height: 2;
+            margin-bottom: 24px;
+            text-shadow: 0 0 40px rgba(201,168,76,0.15);
+        }
+
+        .divider {
+            width: 40px;
+            height: 1px;
+            background: var(--border);
+            margin: 0 auto 20px;
+        }
+
+        .german {
+            font-size: 16px;
+            color: var(--muted);
+            line-height: 1.75;
+            font-style: italic;
+            font-weight: 300;
+            max-width: 440px;
+        }
+
+        .placeholder {
+            color: var(--muted);
+            font-style: italic;
+            font-size: 15px;
+            text-align: center;
+        }
+
+        .placeholder-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+            opacity: 0.3;
+        }
+
+        @keyframes fadeSwap {
+            0%   { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .verse-inner {
+            width: 100%;
+            animation: fadeSwap 0.35s ease both;
+        }
+
+        .footer-info {
+            text-align: center;
+            margin-top: 14px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .loader {
+            display: inline-block;
+            width: 11px; height: 11px;
+            border: 2px solid rgba(201,168,76,0.3);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .debug-panel {
+            margin-top: 16px;
+            background: #0a0e14;
+            border: 1px solid #21262d;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 11px;
+            color: #6e7681;
+            font-family: monospace;
+            display: none;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .debug-panel.visible { display: block; }
+        .debug-toggle {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 11px;
+            color: var(--muted);
+            cursor: pointer;
+            text-decoration: underline;
+            opacity: 0.5;
+        }
+        .debug-toggle:hover { opacity: 1; }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <div class="header">
+        <div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+        <div class="title">Koran · Echtzeit-Synchronisation</div>
+    </div>
+
+    <div class="controls">
+        <select id="surahSelect"><option>Lade Suren…</option></select>
+        <button class="load-btn" id="loadBtn">Laden</button>
+    </div>
+
+    <div class="status" id="status">Initialisiere…</div>
+
+    <audio id="player" controls></audio>
+
+    <div class="verse-display" id="verseDisplay">
+        <div class="placeholder">
+            <div class="placeholder-icon">📖</div>
+            Wähle eine Sure und klicke auf „Laden"
+        </div>
+    </div>
+
+    <div class="footer-info" id="footerInfo"></div>
+    <div class="debug-toggle" id="debugToggle">Debug anzeigen</div>
+    <div class="debug-panel" id="debugPanel"></div>
+</div>
+
+<script>
+    const surahSelect  = document.getElementById('surahSelect');
+    const loadBtn      = document.getElementById('loadBtn');
+    const statusEl     = document.getElementById('status');
+    const player       = document.getElementById('player');
+    const verseDisplay = document.getElementById('verseDisplay');
+    const footerInfo   = document.getElementById('footerInfo');
+    const debugPanel   = document.getElementById('debugPanel');
+    const debugToggle  = document.getElementById('debugToggle');
+
+    // [{from_ms, to_ms}] — Index = Vers-Index (0-basiert)
+    let verses     = [];
+    let timestamps = [];   // sorted by from_ms
+    let currentIdx = -1;
+
+    debugToggle.onclick = () => {
+        debugPanel.classList.toggle('visible');
+        debugToggle.textContent = debugPanel.classList.contains('visible')
+            ? 'Debug ausblenden' : 'Debug anzeigen';
+    };
+
+    function setStatus(msg, type = '') {
+        statusEl.className = 'status' + (type ? ' ' + type : '');
+        statusEl.innerHTML = msg;
+    }
+
+    // ── Surenliste ──────────────────────────────────────────────────
+    async function init() {
+        try {
+            const res  = await fetch('https://api.quran.com/api/v4/chapters?language=de');
+            const data = await res.json();
+            surahSelect.innerHTML = data.chapters.map(c =>
+                `<option value="${c.id}">${c.id}. ${c.name_simple}</option>`
+            ).join('');
+            setStatus('Bereit.');
+        } catch {
+            setStatus('Fehler beim Laden der Surenliste.', 'error');
+        }
+    }
+
+    // ── Vers rendern ────────────────────────────────────────────────
+    function showVerse(idx) {
+        if (idx === currentIdx || idx < 0 || idx >= verses.length) return;
+        currentIdx = idx;
+
+        const v = verses[idx];
+        if (!v) return;
+
+        const translation = v.translations?.[0]?.text?.replace(/<[^>]*>?/gm, '') || '—';
+
+        verseDisplay.innerHTML = `
+            <div class="verse-inner">
+                <div class="verse-number-badge">Vers ${idx + 1} · ${verses.length}</div>
+                <div class="arabic">${v.text_uthmani}</div>
+                <div class="divider"></div>
+                <div class="german">${translation}</div>
+            </div>
+        `;
+
+        footerInfo.textContent =
+            `Sure ${surahSelect.options[surahSelect.selectedIndex]?.text || ''} · Vers ${idx + 1} von ${verses.length}`;
+    }
+
+    // ── Sure laden ──────────────────────────────────────────────────
+    loadBtn.onclick = async () => {
+        const id = surahSelect.value;
+        if (!id || isNaN(id)) return;
+
+        loadBtn.disabled = true;
+        verses     = [];
+        timestamps = [];
+        currentIdx = -1;
+        debugPanel.textContent = '';
+
+        verseDisplay.innerHTML = '<div class="placeholder"><span class="loader"></span> Lade…</div>';
+        footerInfo.textContent = '';
+        setStatus('<span class="loader"></span> Lade Audio…');
+
+        try {
+            // ── 1. Audio + Timestamps  ──────────────────────────────
+            // WICHTIG: ?segments=true ist Pflicht – ohne diesen Parameter
+            // gibt die API kein timestamps-Array zurück!
+            const audioRes  = await fetch(
+                `https://api.quran.com/api/v4/chapter_recitations/7/${id}?segments=true`
+            );
+            const audioData = await audioRes.json();
+            const audioFile = audioData.audio_file;
+
+            player.src = audioFile.audio_url;
+
+            const rawTs = audioFile.timestamps || [];
+
+            // Normalisieren: timestamp_from/to in ms (Zahlen)
+            timestamps = rawTs
+                .map((t, i) => ({
+                    verseIndex: i,
+                    from_ms: Number(t.timestamp_from),
+                    to_ms:   Number(t.timestamp_to)
+                }))
+                .filter(t => !isNaN(t.from_ms))
+                .sort((a, b) => a.from_ms - b.from_ms);  // sicherheitshalber sortieren
+
+            debugPanel.textContent =
+                `URL: ${audioFile.audio_url}\n` +
+                `Timestamps (${rawTs.length}):\n` +
+                JSON.stringify(rawTs.slice(0, 4), null, 2) +
+                (rawTs.length > 4 ? '\n…' : '');
+
+            // ── 2. Verse laden (alle Seiten) ────────────────────────
+            setStatus('<span class="loader"></span> Lade Verse…');
+            let allVerses = [], page = 1;
+            while (true) {
+                const r = await fetch(
+                    `https://api.quran.com/api/v4/verses/by_chapter/${id}` +
+                    `?translations=12&language=de&fields=text_uthmani&per_page=50&page=${page}`
+                );
+                const d = await r.json();
+                allVerses = allVerses.concat(d.verses);
+                if (allVerses.length >= d.pagination.total_records) break;
+                page++;
+            }
+            verses = allVerses;
+
+            // ── Ergebnis ────────────────────────────────────────────
+            if (timestamps.length === 0) {
+                setStatus(`⚠ Keine Timestamps für diese Sure verfügbar`, 'warn');
+            } else {
+                setStatus(`✓ ${verses.length} Verse · ${timestamps.length} Zeitstempel`, 'active');
+            }
+
+            showVerse(0);
+            player.play().catch(() => {});
+
+        } catch (err) {
+            setStatus('Fehler beim Laden.', 'error');
+            verseDisplay.innerHTML = '<div class="placeholder">Fehler. Bitte erneut versuchen.</div>';
+            debugPanel.textContent = 'Fehler: ' + err.message;
+            console.error(err);
+        } finally {
+            loadBtn.disabled = false;
+        }
+    };
+
+    // ── Echtzeit-Sync (binäre Suche) ────────────────────────────────
+    // Findet den letzten Timestamp dessen from_ms ≤ aktuelle Zeit
+    function findVerseIndex(ms) {
+        if (!timestamps.length) return 0;
+        let lo = 0, hi = timestamps.length - 1, result = 0;
+        while (lo <= hi) {
+            const mid = (lo + hi) >> 1;
+            if (timestamps[mid].from_ms <= ms) {
+                result = mid;
+                lo = mid + 1;
+            } else {
+                hi = mid - 1;
+            }
+        }
+        return timestamps[result].verseIndex;
+    }
+
+    player.ontimeupdate = () => {
+        if (!timestamps.length || !verses.length) return;
+
+        const ms  = player.currentTime * 1000;
+        const idx = findVerseIndex(ms);
+
+        if (debugPanel.classList.contains('visible')) {
+            debugPanel.textContent =
+                `Zeit: ${player.currentTime.toFixed(2)}s (${Math.round(ms)} ms)\n` +
+                `→ Vers ${idx + 1} von ${verses.length}\n` +
+                `   from=${timestamps[idx]?.from_ms} ms  to=${timestamps[idx]?.to_ms} ms\n` +
+                `Geladen: ${verses.length} Verse · ${timestamps.length} Timestamps`;
+        }
+
+        showVerse(idx);
+    };
+
+    init();
+</script>
+</body>
+</html>
