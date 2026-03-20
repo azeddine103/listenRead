@@ -3,111 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Koran Player Live</title>
+    <title>Koran Player V3</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f4f9; padding: 20px; display: flex; justify-content: center; }
-        .app-card { background: white; width: 100%; max-width: 500px; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
-        select, button { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; transition: 0.3s; }
-        button { background: #157347; color: white; border: none; font-weight: 600; cursor: pointer; }
-        button:disabled { background: #ccc; cursor: not-allowed; }
-        .display-area { margin-top: 25px; min-height: 200px; padding: 15px; background: #fafafa; border-radius: 10px; }
-        .arabic { font-size: 28px; color: #222; direction: rtl; line-height: 1.8; margin-bottom: 15px; }
-        .german { font-size: 18px; color: #444; line-height: 1.5; font-style: italic; }
-        #log { font-size: 12px; color: #888; margin-top: 10px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #eef2f3; display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; width: 100%; max-width: 450px; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
+        select, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #ddd; font-size: 16px; }
+        button { background: #2c3e50; color: white; border: none; font-weight: bold; cursor: pointer; }
+        button:active { transform: scale(0.98); }
+        .status { font-size: 12px; color: #7f8c8d; margin-bottom: 10px; min-height: 15px; }
+        .arabic { font-size: 26px; color: #2ecc71; direction: rtl; margin-top: 20px; line-height: 1.6; min-height: 50px; }
+        .german { font-size: 16px; color: #34495e; margin-top: 10px; line-height: 1.5; }
+        audio { width: 100%; margin-top: 20px; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-<div class="app-card">
-    <h2>📖 Koran Player</h2>
-    <p id="log">Initialisiere...</p>
+<div class="card">
+    <h2>📖 Koran Live</h2>
+    <div id="status" class="status">Suren werden geladen...</div>
     
-    <select id="surahSelect"><option value="">Wähle eine Sure</option></select>
-    <button id="loadBtn">Sura laden & hören</button>
+    <select id="surahSelect"></select>
+    <button id="playBtn">Jetzt Abspielen</button>
 
-    <audio id="quranAudio" controls style="width: 100%; margin-top: 20px;"></audio>
+    <audio id="player" controls preload="auto"></audio>
 
-    <div class="display-area">
-        <div class="arabic" id="arabicText">---</div>
-        <div class="german" id="germanText">Wähle eine Sure aus der Liste oben.</div>
+    <div id="content">
+        <p class="arabic" id="arText">---</p>
+        <p class="german" id="deText">Wähle eine Sure aus.</p>
     </div>
 </div>
 
 <script>
     const surahSelect = document.getElementById('surahSelect');
-    const loadBtn = document.getElementById('loadBtn');
-    const log = document.getElementById('log');
-    const arabicDisplay = document.getElementById('arabicText');
-    const germanDisplay = document.getElementById('germanText');
-    const audio = document.getElementById('quranAudio');
+    const playBtn = document.getElementById('playBtn');
+    const status = document.getElementById('status');
+    const arText = document.getElementById('arText');
+    const deText = document.getElementById('deText');
+    const player = document.getElementById('player');
 
-    // 1. Suren laden
-    async function fetchSurahs() {
+    // 1. Surenliste laden
+    async function loadList() {
         try {
-            const response = await fetch('https://api.quran.com/api/v4/chapters?language=de');
-            const data = await response.json();
-            
-            data.chapters.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s.id;
-                opt.textContent = `${s.id}. ${s.name_simple} (${s.translated_name.name})`;
-                surahSelect.appendChild(opt);
-            });
-            log.textContent = "Surenliste bereit.";
+            const res = await fetch('https://api.quran.com/api/v4/chapters?language=de');
+            const data = await res.json();
+            surahSelect.innerHTML = data.chapters.map(c => 
+                `<option value="${c.id}">${c.id}. ${c.name_simple}</option>`
+            ).join('');
+            status.innerText = "Bereit zum Abspielen";
         } catch (e) {
-            log.textContent = "Fehler beim Laden der Liste.";
+            status.innerText = "Fehler beim Laden der Surenliste.";
         }
     }
 
-    // 2. Hauptfunktion
-    loadBtn.addEventListener('click', async () => {
+    // 2. Abspielen & Text holen
+    playBtn.addEventListener('click', async () => {
         const id = surahSelect.value;
-        if (!id) return;
-
-        log.textContent = "Lade Daten...";
-        loadBtn.disabled = true;
-
+        status.innerText = "Verbinde mit Server...";
+        
         try {
-            // Audio setzen
-            const audioId = id.toString().padStart(3, '0');
-            audio.src = `https://download.quranicaudio.com/quran/mishari_rashid_alafasy/${audioId}.mp3`;
+            // Audio-URL von der API generieren (Reciter 7 = Alafasy)
+            const audioRes = await fetch(`https://api.quran.com/api/v4/chapter_recitations/7/${id}`);
+            const audioData = await audioRes.json();
+            const audioUrl = audioData.audio_file.audio_url;
+            
+            player.src = audioUrl;
+            player.load(); // Wichtig für Safari/Mobile
 
-            // Text laden (Vers 1 als Vorschau)
-            // Wir nutzen die V4 API mit expliziten Feldern
-            const url = `https://api.quran.com/api/v4/verses/by_chapter/${id}?translations=12&language=de&fields=text_uthmani`;
-            const res = await fetch(url);
-            const data = await res.json();
-
-            // Sicherheits-Check: Existieren die Daten?
-            if (data && data.verses && data.verses.length > 0) {
-                const verse = data.verses[0];
+            // Text holen
+            const textRes = await fetch(`https://api.quran.com/api/v4/verses/by_chapter/${id}?translations=12&language=de&fields=text_uthmani`);
+            const textData = await textRes.json();
+            
+            if(textData.verses && textData.verses[0]) {
+                arText.innerText = textData.verses[0].text_uthmani;
+                deText.innerText = textData.verses[0].translations[0].text.replace(/<[^>]*>?/gm, '');
                 
-                // Arabisch setzen
-                arabicDisplay.textContent = verse.text_uthmani || "Arabisch nicht verfügbar";
+                status.innerText = "Puffere Audio...";
                 
-                // Deutsch setzen (Übersetzung 12 = Bubenheim)
-                if (verse.translations && verse.translations[0]) {
-                    germanDisplay.textContent = verse.translations[0].text.replace(/<[^>]*>?/gm, '');
-                } else {
-                    germanDisplay.textContent = "Übersetzung wird geladen...";
+                // Audio starten
+                const playPromise = player.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        status.innerText = "Spielt ab...";
+                    }).catch(error => {
+                        status.innerText = "Klicke den Play-Button im Player!";
+                        console.log("Autoplay verhindert");
+                    });
                 }
-
-                log.textContent = "Sure " + id + " geladen.";
-                audio.play().catch(() => log.textContent = "Klicke auf Play zum Starten.");
-            } else {
-                throw new Error("Datenstruktur ungültig.");
             }
-
         } catch (err) {
-            console.error(err);
-            log.textContent = "Fehler: " + err.message;
-            germanDisplay.textContent = "Bitte versuche eine andere Sure oder lade die Seite neu.";
-        } finally {
-            loadBtn.disabled = false;
+            status.innerText = "Fehler: " + err.message;
         }
     });
 
-    fetchSurahs();
+    loadList();
 </script>
 
 </body>
