@@ -1,6 +1,6 @@
 {
-  "name": "Koran Sync — القرآن الكريم",
-  "short_name": "Koran Sync",
+  "name": "Kran Kareem — القرآن الكريم",
+  "short_name": "Iqraa Koran",
   "description": "Koran Rezitation mit Wort-für-Wort Synchronisation",
   "start_url": "./index.html",
   "display": "standalone",
@@ -10,13 +10,13 @@
   "lang": "ar",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "quran.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-512.png",
+      "src": "quran.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -28,7 +28,7 @@
       "name": "Al-Fatiha",
       "short_name": "الفاتحة",
       "url": "./index.html",
-      "description": "Öffne Koran Sync"
+      "description": "Öffne Iqraa Koran"
     }
   ]
 }
