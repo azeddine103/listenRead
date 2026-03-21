@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Koran Sync</title>
-    <meta name="theme-color" content="#080b0f">
+    <meta name="theme-color" content="#f0ebe0">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Koran Sync">
@@ -14,18 +14,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg:        #080b0f;
-            --surface:   #0e1318;
-            --card:      #131920;
-            --border:    #1e2730;
-            --border2:   #2a3540;
-            --gold:      #c8a84b;
-            --gold2:     #e8c97a;
-            --gold-dim:  rgba(200,168,75,0.18);
-            --gold-glow: rgba(200,168,75,0.28);
-            --text:      #e8dfd0;
-            --muted:     #7a8a96;
-            --muted2:    #4a5a66;
+            --bg:        #f0ebe0;
+            --surface:   #e8e1d2;
+            --card:      #faf7f1;
+            --border:    #d8cfc0;
+            --border2:   #c4b99a;
+            --gold:      #8a6a1f;
+            --gold2:     #a07c28;
+            --gold-dim:  rgba(138,106,31,0.10);
+            --gold-glow: rgba(138,106,31,0.20);
+            --text:      #2c2415;
+            --muted:     #6a5a3a;
+            --muted2:    #9e8e6a;
             --green:     #1c6b3a;
             --green2:    #24884a;
         }
@@ -49,9 +49,9 @@
             content: '';
             position: fixed; inset: 0; z-index: 0;
             background:
-                radial-gradient(ellipse 70% 50% at 15% 5%,  rgba(200,168,75,0.04) 0%, transparent 60%),
+                radial-gradient(ellipse 70% 50% at 15% 5%,  rgba(138,106,31,0.06) 0%, transparent 60%),
                 radial-gradient(ellipse 50% 70% at 85% 95%, rgba(28,107,58,0.05)  0%, transparent 60%),
-                radial-gradient(ellipse 40% 40% at 50% 50%, rgba(200,168,75,0.02) 0%, transparent 70%);
+                radial-gradient(ellipse 40% 40% at 50% 50%, rgba(138,106,31,0.04) 0%, transparent 70%);
             pointer-events: none;
         }
 
@@ -59,9 +59,9 @@
         body::after {
             content: '';
             position: fixed; inset: 0; z-index: 0;
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c8a84b' fill-opacity='0.025'%3E%3Cpath d='M30 0 L32 28 L60 30 L32 32 L30 60 L28 32 L0 30 L28 28Z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%238a6a1f' fill-opacity='0.04'%3E%3Cpath d='M30 0 L32 28 L60 30 L32 32 L30 60 L28 32 L0 30 L28 28Z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
             pointer-events: none;
-            opacity: 0.6;
+            opacity: 0.7;
         }
 
         .wrapper {
@@ -95,8 +95,8 @@
             direction: rtl;
             letter-spacing: 0.05em;
             text-shadow:
-                0 0 40px rgba(200,168,75,0.4),
-                0 0 80px rgba(200,168,75,0.15);
+                0 0 40px rgba(138,106,31,0.25),
+                0 0 80px rgba(138,106,31,0.10);
             line-height: 1.6;
         }
 
@@ -123,7 +123,7 @@
             position: absolute;
             left: 12px; top: 50%;
             transform: translateY(-50%);
-            color: var(--muted);
+            color: var(--muted2);
             pointer-events: none;
             font-size: 12px;
         }
@@ -160,12 +160,12 @@
             cursor: pointer;
             transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
             white-space: nowrap;
-            box-shadow: 0 2px 12px rgba(28,107,58,0.3);
+            box-shadow: 0 2px 12px rgba(28,107,58,0.25);
         }
 
-        .load-btn:hover   { opacity: 0.9; box-shadow: 0 4px 20px rgba(28,107,58,0.45); }
+        .load-btn:hover   { opacity: 0.9; box-shadow: 0 4px 20px rgba(28,107,58,0.35); }
         .load-btn:active  { transform: scale(0.97); }
-        .load-btn:disabled { background: var(--card); color: var(--muted2); cursor: not-allowed; box-shadow: none; }
+        .load-btn:disabled { background: var(--surface); color: var(--muted2); cursor: not-allowed; box-shadow: none; }
 
         /* ── Audio ── */
         .audio-wrap {
@@ -213,7 +213,7 @@
         }
 
         .nav-btn:active:not(:disabled) { transform: scale(0.97); }
-        .nav-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+        .nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
         .nav-info {
             flex: 1;
@@ -221,7 +221,7 @@
             font-family: 'Amiri', serif;
             font-size: 15px;
             color: var(--gold);
-            opacity: 0.7;
+            opacity: 0.8;
             letter-spacing: 0.05em;
         }
 
@@ -239,6 +239,7 @@
             text-align: center;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 2px 24px rgba(138,106,31,0.07);
         }
 
         /* Goldene Linie oben */
@@ -266,7 +267,7 @@
         .arabic-words {
             font-family: 'Amiri Quran', 'Amiri', serif;
             font-size: 32px;
-            color: rgba(232,223,208,0.35);
+            color: rgba(44,36,21,0.35);
             direction: rtl;
             line-height: 2.2;
             margin-bottom: 28px;
@@ -287,17 +288,17 @@
         }
 
         .w.active {
-            color: #fff;
+            color: #3a2800;
             text-shadow:
-                0 0 20px rgba(200,168,75,0.75),
-                0 0 50px rgba(200,168,75,0.3);
+                0 0 20px rgba(138,106,31,0.45),
+                0 0 50px rgba(138,106,31,0.2);
         }
 
-        .w.spoken { color: rgba(232,223,208,0.55); }
+        .w.spoken { color: rgba(44,36,21,0.45); }
 
         .w.playing {
             color: var(--gold2);
-            text-shadow: 0 0 22px rgba(232,201,122,0.85);
+            text-shadow: 0 0 22px rgba(160,124,40,0.65);
             transform: scale(1.1);
         }
 
@@ -364,7 +365,7 @@
         .placeholder-icon {
             font-size: 36px;
             margin-bottom: 14px;
-            opacity: 0.2;
+            opacity: 0.3;
             display: block;
         }
 
@@ -393,12 +394,12 @@
 
         /* ── Status ── */
         .status { font-size: 12px; color: var(--muted); text-align: center; margin-bottom: 0; min-height: 0; }
-        .status.error { color: #f85149; }
+        .status.error { color: #c0392b; }
 
         /* ── Loader ── */
         .loader {
             display: inline-block; width: 11px; height: 11px;
-            border: 2px solid rgba(200,168,75,0.2);
+            border: 2px solid rgba(138,106,31,0.2);
             border-top-color: var(--gold);
             border-radius: 50%;
             animation: spin 0.7s linear infinite;
@@ -618,11 +619,9 @@
                 document.querySelectorAll('#arabicWords .w.playing').forEach(e => e.classList.remove('playing'));
                 el.classList.add('playing');
 
-                // Wort vom gewählten Rezitator abspielen:
-                // Exakte Dauer per setTimeout — ontimeupdate ist zu ungenau
                 const wordFrom = wordData?.from_ms != null ? wordData.from_ms / 1000 : null;
                 const wordDur  = (wordData?.from_ms != null && wordData?.to_ms != null)
-                    ? (wordData.to_ms - wordData.from_ms)  // ms
+                    ? (wordData.to_ms - wordData.from_ms)
                     : null;
 
                 if (wordFrom !== null && wordDur !== null) {
@@ -641,14 +640,12 @@
                     wordAudio.addEventListener('canplay', () => {
                         wordAudio.currentTime = wordFrom;
                         wordAudio.play().catch(() => {});
-                        // Stopp nach exakter Wort-Dauer (+ 30ms Puffer für sauberes Ende)
                         stopTimer = setTimeout(stop, wordDur + 30);
                     }, { once: true });
 
                     wordAudio.onended = stop;
 
                 } else if (audioUrl) {
-                    // Fallback: generische Wort-Audio-URL (Afasy)
                     if (wordAudio) { wordAudio.pause(); wordAudio = null; }
                     wordAudio = new Audio('https://audio.qurancdn.com/' + audioUrl);
                     wordAudio.play().catch(() => {});
