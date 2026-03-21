@@ -971,7 +971,37 @@
     }
     window.speechSynthesis.onvoiceschanged = logVoices;
 
-    
+    function getMaleGermanVoice() {
+        const voices = window.speechSynthesis.getVoices();
+        logVoices();
+
+        // Priority list: explicit male German names
+        const MALE = ['stefan', 'hans', 'markus', 'daniel', 'thomas', 'martin',
+                      'michael', 'google deutsch', 'de-de-neural2-b', 'de-de-neural2-d',
+                      'de-de-wavenet-b', 'de-de-wavenet-d', 'male'];
+        const FEMALE = ['anna', 'petra', 'jana', 'yannick', 'female', 'marie',
+                        'hannah', 'sarah', 'lena', 'lea', 'nina', 'klara'];
+
+        // 1. Explicitly male German
+        let pick = voices.find(v =>
+            v.lang.startsWith('de') && MALE.some(k => v.name.toLowerCase().includes(k))
+        );
+        // 2. German, not female
+        if (!pick) pick = voices.find(v =>
+            v.lang.startsWith('de') && !FEMALE.some(k => v.name.toLowerCase().includes(k))
+        );
+        // 3. Any German
+        if (!pick) pick = voices.find(v => v.lang.startsWith('de'));
+        // 4. Explicit male English as last resort (still sounds male)
+        if (!pick) pick = voices.find(v =>
+            v.lang.startsWith('en') && MALE.some(k => v.name.toLowerCase().includes(k))
+        );
+        // 5. Any voice
+        if (!pick && voices.length) pick = voices[0];
+
+        console.log('Gewählte Stimme:', pick?.name, pick?.lang);
+        return pick;
+    }
 
     function setTTSBtnState(speaking) {
         const btn = document.getElementById('ttsBtn');
