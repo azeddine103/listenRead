@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
@@ -353,6 +353,27 @@
         }
 
         /* ── Deutsche Übersetzung Block ── */
+        /* ── TTS Button ── */
+        .tts-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            background: none;
+            border: 1px solid var(--border2);
+            border-radius: 20px;
+            color: var(--muted);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 12px;
+            letter-spacing: 0.06em;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 10px;
+        }
+        .tts-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+        .tts-btn.speaking { border-color: #c0392b; color: #c0392b; background: rgba(192,57,43,0.07); }
+        .tts-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
+
         .german-block {
             padding: 28px 36px 34px;
             background: linear-gradient(160deg, var(--surface) 0%, #e2d9c8 100%);
@@ -680,7 +701,15 @@
                     <div class="arabic-words" id="arabicWords">${wordsHtml}</div>
                 </div>
                 <div class="german-block">
-                    <div class="german">${v.german || '—'}</div>
+                    ${v.german ? `<button class="tts-btn" id="ttsBtn" onclick="toggleTTS(this)" title="Übersetzung vorlesen">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                        </svg>
+                        Vorlesen
+                    </button>` : ''}
+                    <div class="german" id="germanText">${v.german || '—'}</div>
                 </div>
             </div>
         `;
@@ -793,12 +822,23 @@
         return result;
     }
 
+    // Stop TTS whenever arabic audio starts playing
+    player.addEventListener('play', () => {
+        if (window.speechSynthesis?.speaking || ttsAutoPlay) {
+            ttsAutoPlay = false;
+            stopTTS();
+        }
+    });
+
     loadBtn.onclick = async () => {
         const surahId   = parseInt(surahSelect.value);
         const reciterId = parseInt(reciterSelect.value);
         if (!surahId || !reciterId) return;
 
         loadBtn.disabled = true;
+        // Stop TTS when new surah is loaded
+        ttsAutoPlay = false;
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
         verses = []; verseTimes = []; currentVerseIdx = -1; currentWordIdx = -1;
         if (wordAudio) { wordAudio.pause(); wordAudio = null; }
 
@@ -918,6 +958,128 @@
 
     prevBtn.onclick = () => jumpToVerse(currentVerseIdx - 1);
     nextBtn.onclick = () => jumpToVerse(currentVerseIdx + 1);
+
+    // ── Text-to-Speech ────────────────────────────────────────────
+    let ttsAutoPlay = false;
+
+    // ── Beste verfügbare Männerstimme ────────────────────────────
+    // Log all voices to console for debugging
+    function logVoices() {
+        const voices = window.speechSynthesis.getVoices();
+        console.log('=== Verfügbare Stimmen ===');
+        voices.forEach((v,i) => console.log(i, v.name, v.lang, v.localService));
+    }
+    window.speechSynthesis.onvoiceschanged = logVoices;
+
+    
+
+    function setTTSBtnState(speaking) {
+        const btn = document.getElementById('ttsBtn');
+        if (!btn) return;
+        btn.classList.toggle('speaking', speaking);
+        btn.innerHTML = speaking
+            ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
+               </svg> Stopp`
+            : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+               </svg> Vorlesen`;
+    }
+
+    function stopTTS() {
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        setTTSBtnState(false);
+    }
+
+    // ── Einen Vers vorlesen, dann onDone() aufrufen ───────────────
+    function speakVerse(text, onDone) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang  = 'de-DE';
+        utter.rate  = 0.88;
+        utter.pitch = 0.75;   // tief = männlich
+
+        const doSpeak = () => {
+            const voice = getMaleGermanVoice();
+            if (voice) utter.voice = voice;
+            utter.onstart = () => setTTSBtnState(true);
+            utter.onend   = () => { setTTSBtnState(false); onDone?.(); };
+            utter.onerror = () => { setTTSBtnState(false); onDone?.(); };
+            window.speechSynthesis.speak(utter);
+        };
+
+        if (window.speechSynthesis.getVoices().length === 0) {
+            window.speechSynthesis.addEventListener('voiceschanged', doSpeak, { once: true });
+        } else {
+            doSpeak();
+        }
+    }
+
+    // ── Aktuellen Vers lesen, dann zum nächsten weiterschalten ────
+    // Fix: Text wird VOR jumpToVerse gelesen, damit Vers 2 nicht übersprungen wird
+    function ttsNext() {
+        if (!ttsAutoPlay) return;
+        const text = document.getElementById('germanText')?.textContent?.trim();
+        if (!text || text === '—') {
+            // Leerer Vers → direkt weiter
+            if (currentVerseIdx < verses.length - 1) {
+                jumpToVerse(currentVerseIdx + 1);
+                setTimeout(ttsNext, 150);
+            } else { ttsAutoPlay = false; }
+            return;
+        }
+        // Erst lesen, DANN erst zum nächsten Vers springen
+        speakVerse(text, () => {
+            if (!ttsAutoPlay) return;
+            if (currentVerseIdx < verses.length - 1) {
+                jumpToVerse(currentVerseIdx + 1);
+                // DOM hat sich aktualisiert — direkt lesen (kein extra setTimeout nötig)
+                ttsNext();
+            } else {
+                ttsAutoPlay = false;
+                setTTSBtnState(false);
+            }
+        });
+    }
+
+    function toggleTTS(btn) {
+        if (!window.speechSynthesis) {
+            alert('Text-to-Speech wird von diesem Browser nicht unterstützt.');
+            return;
+        }
+        if (ttsAutoPlay || window.speechSynthesis.speaking) {
+            ttsAutoPlay = false;
+            stopTTS();
+            return;
+        }
+        ttsAutoPlay = true;
+        player.pause();
+        ttsNext();
+    }
+
+    prevBtn.addEventListener('click', () => { ttsAutoPlay = false; stopTTS(); });
+    nextBtn.addEventListener('click', () => { ttsAutoPlay = false; stopTTS(); });
+
+    // ── Audio stoppen beim Verlassen der App ─────────────────────
+    // visibilitychange: App in Hintergrund / Tab gewechselt
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            player.pause();
+            if (wordAudio) { wordAudio.pause(); }
+            ttsAutoPlay = false;
+            if (window.speechSynthesis) window.speechSynthesis.cancel();
+        }
+    });
+
+    // pagehide: App geschlossen / Browser-Tab zu
+    window.addEventListener('pagehide', () => {
+        player.pause();
+        if (wordAudio) { wordAudio.pause(); }
+        ttsAutoPlay = false;
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+    });
 
     player.ontimeupdate = () => {
         if (!verses.length || !verseTimes.length || seekLock) return;
