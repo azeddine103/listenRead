@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
@@ -495,6 +495,9 @@
 <body>
 <div class="wrapper">
 
+    <div id="offlineBanner" style="display:none; text-align:center; background:#c0392b; color:#fff; font-family:'Cormorant Garamond',serif; font-size:13px; padding:6px; border-radius:8px; margin-bottom:10px; letter-spacing:0.06em;">
+        ⚡ Offline-Modus · وضع عدم الاتصال
+    </div>
     <div class="header">
         <div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
     </div>
@@ -879,6 +882,20 @@
             setStatus('');
             document.getElementById('clickHint').style.display = 'block';
             renderVerse(0);
+
+            // Aktuelle Sure für Offline-Nutzung im Cache speichern
+            if (navigator.serviceWorker?.controller) {
+                navigator.serviceWorker.controller.postMessage({
+                    type: 'PRECACHE_SURAH',
+                    surahId,
+                    reciterId,
+                    audioUrl: player.src
+                });
+                setStatus('✓ Sure wird für Offline gespeichert… <span class="loader"></span>');
+                navigator.serviceWorker.addEventListener('message', e => {
+                    if (e.data?.type === 'PRECACHE_DONE') setStatus('✓ Offline verfügbar · متاح بدون إنترنت');
+                }, { once: true });
+            }
             updateNavButtons();
 
             player.play().catch(() => {
@@ -912,6 +929,15 @@
 </script>
 
     <script>
+        // Online/Offline Erkennung
+        const banner = document.getElementById('offlineBanner');
+        function updateOnlineStatus() {
+            banner.style.display = navigator.onLine ? 'none' : 'block';
+        }
+        window.addEventListener('online',  updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        updateOnlineStatus();
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').catch(() => {});
