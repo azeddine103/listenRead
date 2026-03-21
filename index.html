@@ -15,8 +15,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg:        #ffffff;
-            --surface:   #faf7f2;
+            --bg:        #f2ece0;
+            --surface:   #ede5d8;
             --card:      #ffffff;
             --border:    #ede8de;
             --border2:   #d4c8a8;
@@ -196,10 +196,10 @@
         }
 
         .nav-btn {
-            padding: 13px 0;
+            padding: 4px 0;
             background: var(--card);
             border: 1px solid var(--border);
-            border-radius: 14px;
+            border-radius: 10px;
             color: var(--muted);
             font-family: 'Cormorant Garamond', serif;
             font-size: 14px;
@@ -218,7 +218,7 @@
         }
 
         .nav-btn-arrow {
-            font-size: 22px;
+            font-size: 16px;
             line-height: 1;
             color: var(--gold);
             opacity: 0.8;
@@ -226,7 +226,7 @@
         }
 
         .nav-btn-label {
-            font-size: 11px;
+            font-size: 10px;
             letter-spacing: 0.08em;
             text-transform: uppercase;
             color: var(--muted2);
@@ -251,13 +251,13 @@
             background: var(--gold-dim);
             border: 1px solid var(--border2);
             border-radius: 14px;
-            padding: 10px 16px;
+            padding: 8px 14px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 2px;
-            min-width: 72px;
+            gap: 0;
+            min-width: 64px;
         }
 
         .nav-info-num {
@@ -268,19 +268,23 @@
             line-height: 1.1;
         }
 
-        .nav-info-total {
-            font-size: 11px;
-            color: var(--muted2);
-            letter-spacing: 0.06em;
+        .nav-info-divider {
+            width: 28px;
+            height: 1px;
+            background: var(--gold);
+            opacity: 0.4;
+            margin: 3px 0;
         }
 
-        .nav-info-label {
-            font-size: 10px;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: var(--muted2);
-            margin-top: 1px;
+        .nav-info-total {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 16px;
+            font-weight: 400;
+            color: var(--muted);
+            line-height: 1.1;
         }
+
+        .nav-info-label { display: none; }
 
         /* ── Vers-Display ── */
         .verse-display {
@@ -314,7 +318,7 @@
         .arabic-words {
             font-family: 'Amiri Quran', 'Amiri', serif;
             font-size: 28px;
-            color: rgba(44,36,21,0.4);
+            color: #1a1008;
             direction: rtl;
             line-height: 2.2;
             word-spacing: 8px;
@@ -334,17 +338,17 @@
         }
 
         .w.active {
-            color: #3a2800;
+            color: #c0392b;
             text-shadow:
-                0 0 20px rgba(138,106,31,0.45),
-                0 0 50px rgba(138,106,31,0.2);
+                0 0 18px rgba(192,57,43,0.5),
+                0 0 40px rgba(192,57,43,0.2);
         }
 
-        .w.spoken { color: rgba(44,36,21,0.5); }
+        .w.spoken { color: rgba(44,36,21,0.65); }
 
         .w.playing {
-            color: var(--gold2);
-            text-shadow: 0 0 22px rgba(160,124,40,0.65);
+            color: #c0392b;
+            text-shadow: 0 0 22px rgba(192,57,43,0.6);
             transform: scale(1.1);
         }
 
@@ -518,16 +522,16 @@
     <div class="verse-nav">
         <button class="nav-btn" id="prevBtn" disabled>
             <span class="nav-btn-arrow">→</span>
-            <span class="nav-btn-label">Zurück</span>
+            <span class="nav-btn-label">Zurück · السابقة</span>
         </button>
         <div class="nav-info" id="navInfo">
             <span class="nav-info-num">—</span>
-            <span class="nav-info-total"></span>
-            <span class="nav-info-label">Vers</span>
+            <div class="nav-info-divider"></div>
+            <span class="nav-info-total">—</span>
         </div>
         <button class="nav-btn" id="nextBtn" disabled>
             <span class="nav-btn-arrow">←</span>
-            <span class="nav-btn-label">Weiter</span>
+            <span class="nav-btn-label">Weiter · التالية</span>
         </button>
     </div>
 
@@ -637,7 +641,7 @@
         nextBtn.disabled = (currentVerseIdx >= verses.length - 1);
         if (verses.length > 0 && currentVerseIdx >= 0) {
             navInfo.querySelector('.nav-info-num').textContent = currentVerseIdx + 1;
-            navInfo.querySelector('.nav-info-total').textContent = 'von ' + verses.length;
+            navInfo.querySelector('.nav-info-total').textContent = verses.length;
         }
     }
 
