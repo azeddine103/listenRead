@@ -736,6 +736,10 @@
                 const wordIdx  = parseInt(el.dataset.i);
                 const audioUrl = el.dataset.audio;
 
+                // Stop TTS if running
+                ttsAutoPlay = false;
+                stopTTS();
+
                 player.pause();
 
                 const wordData = verses[currentVerseIdx]?.words?.[wordIdx];
