@@ -3,7 +3,7 @@
   "name": "Iqraa Koran",
   "short_name": "Iqraa",
   "description": "Koran lesen und anhören mit deutscher Übersetzung",
-  "start_url": "./koran-sync.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f2ece0",
