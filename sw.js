@@ -1,5 +1,5 @@
 // ── Iqraa Koran Service Worker ────────────────────────────────────
-const VERSION      = 'iqraa-v1';
+const VERSION      = 'iqraa-v2';
 const SHELL_CACHE  = VERSION + '-shell';
 const API_CACHE    = VERSION + '-api';
 const AUDIO_CACHE  = VERSION + '-audio';
@@ -7,7 +7,7 @@ const AUDIO_CACHE  = VERSION + '-audio';
 // App-Shell: alles was zum Starten nötig ist
 const SHELL_URLS = [
     './',
-    './koran-sync.html',
+    './index.html',
     './manifest.json',
     'https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap',
 ];
