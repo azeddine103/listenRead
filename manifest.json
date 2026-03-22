@@ -1,24 +1,52 @@
 {
+  "id": "/iqraa-koran/",
   "name": "Iqraa Koran",
   "short_name": "Iqraa",
   "description": "Koran lesen und anhören mit deutscher Übersetzung",
-  "start_url": ".",
+  "start_url": "./koran-sync.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#f2ece0",
   "theme_color": "#f2ece0",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "quran.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "quran.png",
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
-  ]
+  ],
+  "screenshots": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Iqraa Koran – Vers-Ansicht"
+    }
+  ],
+  "categories": [
+    "education",
+    "lifestyle"
+  ],
+  "lang": "de"
 }
