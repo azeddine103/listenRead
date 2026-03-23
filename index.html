@@ -12,7 +12,6 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="quran.png">
     <link rel="icon" type="image/png" href="quran.png">
-    <script src="https://code.responsivevoice.org/responsivevoice.js?key=FREE"></script>
     <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -829,9 +828,7 @@
 
     // Stop TTS whenever arabic audio starts playing
     player.addEventListener('play', () => {
-        if (ttsAutoPlay || (window.responsiveVoice?.isPlaying())) {
-            stopTTS();
-        }
+        if (ttsAutoPlay || ttsAudio) { stopTTS(); }
     });
 
     loadBtn.onclick = async () => {
@@ -962,10 +959,17 @@
     prevBtn.onclick = () => jumpToVerse(currentVerseIdx - 1);
     nextBtn.onclick = () => jumpToVerse(currentVerseIdx + 1);
 
-    // ── Text-to-Speech via ResponsiveVoice ──────────────────────
-    // Konsistente deutsche Männerstimme auf allen Geräten (Android, iOS, Windows)
-    let ttsAutoPlay = false;
-    const RV_VOICE = 'Deutsch Male';  // ResponsiveVoice deutsche Männerstimme
+    // ── Text-to-Speech via ElevenLabs ────────────────────────────
+    // Natürliche Männerstimme — konsistent auf allen Geräten
+    // ► API-Key eintragen: https://elevenlabs.io → Profile → API Key
+    const EL_API_KEY  = 'DEIN_API_KEY_HIER';
+    // ► Voice-ID: "Adam" (englisch/deutsch, tief männlich) — oder eigene ID eintragen
+    // Andere gute Stimmen: Daniel (de), Antoni, Josh
+    // Stimmen-Liste: https://api.elevenlabs.io/v1/voices
+    const EL_VOICE_ID = 'pNInz6obpgDQGcFmaJgB'; // Adam
+
+    let ttsAutoPlay  = false;
+    let ttsAudio     = null; // aktuelles Audio-Objekt
 
     function setTTSBtnState(speaking) {
         const btn = document.getElementById('ttsBtn');
@@ -983,29 +987,75 @@
     }
 
     function stopTTS() {
-        if (window.responsiveVoice) responsiveVoice.cancel();
         ttsAutoPlay = false;
+        if (ttsAudio) { ttsAudio.pause(); ttsAudio = null; }
         setTTSBtnState(false);
     }
 
-    function speakVerse(text, onDone) {
-        if (!window.responsiveVoice) {
-            // Fallback auf Web Speech API wenn ResponsiveVoice nicht geladen
-            const utter = new SpeechSynthesisUtterance(text);
-            utter.lang = 'de-DE'; utter.rate = 0.88; utter.pitch = 0.75;
-            utter.onend = () => { setTTSBtnState(false); onDone?.(); };
-            utter.onerror = () => { setTTSBtnState(false); onDone?.(); };
-            window.speechSynthesis.speak(utter);
+    async function speakVerse(text, onDone) {
+        if (!text || text === '—') { onDone?.(); return; }
+
+        if (!EL_API_KEY || EL_API_KEY === 'DEIN_API_KEY_HIER') {
+            alert('Bitte ElevenLabs API-Key in der index.html eintragen.
+Zeile: const EL_API_KEY = 'DEIN_API_KEY_HIER'');
+            stopTTS();
             return;
         }
-        responsiveVoice.speak(text, RV_VOICE, {
-            rate: 0.9,
-            pitch: 1,
-            volume: 1,
-            onstart: () => setTTSBtnState(true),
-            onend:   () => { setTTSBtnState(false); onDone?.(); },
-            onerror: () => { setTTSBtnState(false); onDone?.(); }
-        });
+
+        setTTSBtnState(true);
+
+        try {
+            const res = await fetch(
+                `https://api.elevenlabs.io/v1/text-to-speech/${EL_VOICE_ID}/stream`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'xi-api-key': EL_API_KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text,
+                        model_id: 'eleven_multilingual_v2', // unterstützt Deutsch
+                        voice_settings: {
+                            stability: 0.55,
+                            similarity_boost: 0.80,
+                            style: 0.15,
+                            use_speaker_boost: true
+                        }
+                    })
+                }
+            );
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err?.detail?.message || `ElevenLabs Fehler: ${res.status}`);
+            }
+
+            const blob = await res.blob();
+            const url  = URL.createObjectURL(blob);
+            ttsAudio   = new Audio(url);
+
+            ttsAudio.onended = () => {
+                URL.revokeObjectURL(url);
+                ttsAudio = null;
+                setTTSBtnState(false);
+                onDone?.();
+            };
+            ttsAudio.onerror = () => {
+                URL.revokeObjectURL(url);
+                ttsAudio = null;
+                setTTSBtnState(false);
+                onDone?.();
+            };
+
+            ttsAudio.play();
+
+        } catch (e) {
+            console.error('ElevenLabs TTS Fehler:', e);
+            setStatus('TTS Fehler: ' + e.message, 'error');
+            setTTSBtnState(false);
+            ttsAutoPlay = false;
+        }
     }
 
     function ttsNext() {
@@ -1031,7 +1081,7 @@
     }
 
     function toggleTTS(btn) {
-        if (ttsAutoPlay || (window.responsiveVoice && responsiveVoice.isPlaying())) {
+        if (ttsAutoPlay || ttsAudio) {
             stopTTS();
             return;
         }
