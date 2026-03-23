@@ -583,6 +583,8 @@
     const navInfo       = document.getElementById('navInfo');
 
     let verses          = [];
+    let ttsAutoPlay     = false;
+    let ttsAudio        = null;
     let verseTimes      = [];
     let currentVerseIdx = -1;
     let currentWordIdx  = -1;
@@ -828,7 +830,7 @@
 
     // Stop TTS whenever arabic audio starts playing
     player.addEventListener('play', () => {
-        if (ttsAutoPlay || ttsAudio) { stopTTS(); }
+        if (ttsAutoPlay || window.speechSynthesis?.speaking) { stopTTS(); }
     });
 
     loadBtn.onclick = async () => {
@@ -959,17 +961,25 @@
     prevBtn.onclick = () => jumpToVerse(currentVerseIdx - 1);
     nextBtn.onclick = () => jumpToVerse(currentVerseIdx + 1);
 
-    // ── Text-to-Speech via ElevenLabs ────────────────────────────
-    // Natürliche Männerstimme — konsistent auf allen Geräten
-    // ► API-Key eintragen: https://elevenlabs.io → Profile → API Key
-    const EL_API_KEY  = 'sk_9b32fb7085e3f39a9dd8e2ab8514b1c92f42186ba9b6b56b';
-    // ► Voice-ID: "Adam" (englisch/deutsch, tief männlich) — oder eigene ID eintragen
-    // Andere gute Stimmen: Daniel (de), Antoni, Josh
-    // Stimmen-Liste: https://api.elevenlabs.io/v1/voices
-    const EL_VOICE_ID = 'pNInz6obpgDQGcFmaJgB'; // Adam
+    // ── Text-to-Speech via Piper TTS (Thorsten — deutsche Männerstimme) ──
+    // ttsAutoPlay + ttsAudio bereits oben deklariert
+    let piperWorker = null;
+    let piperReady  = false;
 
-    let ttsAutoPlay  = false;
-    let ttsAudio     = null; // aktuelles Audio-Objekt
+    function initPiper() {
+        if (piperWorker) return;
+        piperWorker = new Worker('piper-worker.js');
+        piperWorker.onmessage = (e) => {
+            if (e.data.type === 'ready') {
+                piperReady = true;
+            }
+        };
+        piperWorker.onerror = (e) => {
+            console.warn('Piper Worker Fehler — Fallback aktiv:', e.message);
+            piperWorker = null;
+        };
+        piperWorker.postMessage({ type: 'init' });
+    }
 
     function setTTSBtnState(speaking) {
         const btn = document.getElementById('ttsBtn');
@@ -989,104 +999,93 @@
     function stopTTS() {
         ttsAutoPlay = false;
         if (ttsAudio) { ttsAudio.pause(); ttsAudio = null; }
+        window.speechSynthesis?.cancel();
         setTTSBtnState(false);
     }
 
-    async function speakVerse(text, onDone) {
-        if (!text || text === '—') { onDone?.(); return; }
+    // Piper: Text → WAV über Worker → Audio abspielen
+    async function speakViaPiper(text) {
+        return new Promise((resolve) => {
+            const timeout = setTimeout(() => {
+                piperWorker?.removeEventListener('message', handler);
+                resolve(false); // Timeout → Fallback
+            }, 20000);
 
-        if (!EL_API_KEY || EL_API_KEY === 'DEIN_API_KEY_HIER') {
-            alert('Bitte ElevenLabs API-Key in der index.html eintragen.
-Zeile: const EL_API_KEY = 'DEIN_API_KEY_HIER'');
-            stopTTS();
-            return;
-        }
-
-        setTTSBtnState(true);
-
-        try {
-            const res = await fetch(
-                `https://api.elevenlabs.io/v1/text-to-speech/${EL_VOICE_ID}/stream`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'xi-api-key': EL_API_KEY,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        text,
-                        model_id: 'eleven_multilingual_v2', // unterstützt Deutsch
-                        voice_settings: {
-                            stability: 0.55,
-                            similarity_boost: 0.80,
-                            style: 0.15,
-                            use_speaker_boost: true
-                        }
-                    })
+            function handler(e) {
+                if (e.data.type === 'audio') {
+                    clearTimeout(timeout);
+                    piperWorker.removeEventListener('message', handler);
+                    const url = URL.createObjectURL(e.data.wav);
+                    ttsAudio  = new Audio(url);
+                    ttsAudio.onended  = () => { URL.revokeObjectURL(url); ttsAudio = null; resolve(true); };
+                    ttsAudio.onerror  = () => { URL.revokeObjectURL(url); ttsAudio = null; resolve(false); };
+                    ttsAudio.play().catch(() => resolve(false));
+                } else if (e.data.type === 'error') {
+                    clearTimeout(timeout);
+                    piperWorker.removeEventListener('message', handler);
+                    resolve(false);
                 }
-            );
-
-            if (!res.ok) {
-                const err = await res.json().catch(() => ({}));
-                throw new Error(err?.detail?.message || `ElevenLabs Fehler: ${res.status}`);
             }
 
-            const blob = await res.blob();
-            const url  = URL.createObjectURL(blob);
-            ttsAudio   = new Audio(url);
-
-            ttsAudio.onended = () => {
-                URL.revokeObjectURL(url);
-                ttsAudio = null;
-                setTTSBtnState(false);
-                onDone?.();
-            };
-            ttsAudio.onerror = () => {
-                URL.revokeObjectURL(url);
-                ttsAudio = null;
-                setTTSBtnState(false);
-                onDone?.();
-            };
-
-            ttsAudio.play();
-
-        } catch (e) {
-            console.error('ElevenLabs TTS Fehler:', e);
-            setStatus('TTS Fehler: ' + e.message, 'error');
-            setTTSBtnState(false);
-            ttsAutoPlay = false;
-        }
-    }
-
-    function ttsNext() {
-        if (!ttsAutoPlay) return;
-        const text = document.getElementById('germanText')?.textContent?.trim();
-        if (!text || text === '—') {
-            if (currentVerseIdx < verses.length - 1) {
-                jumpToVerse(currentVerseIdx + 1);
-                setTimeout(ttsNext, 150);
-            } else { ttsAutoPlay = false; }
-            return;
-        }
-        speakVerse(text, () => {
-            if (!ttsAutoPlay) return;
-            if (currentVerseIdx < verses.length - 1) {
-                jumpToVerse(currentVerseIdx + 1);
-                ttsNext();
-            } else {
-                ttsAutoPlay = false;
-                setTTSBtnState(false);
-            }
+            piperWorker.addEventListener('message', handler);
+            piperWorker.postMessage({ type: 'speak', text });
         });
     }
 
-    function toggleTTS(btn) {
-        if (ttsAutoPlay || ttsAudio) {
-            stopTTS();
-            return;
+    // Fallback: Web Speech API
+    function speakViaWebSpeech(text) {
+        return new Promise((resolve) => {
+            window.speechSynthesis.cancel();
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.lang  = 'de-DE';
+            utter.rate  = 0.88;
+            utter.pitch = 0.75;
+            const voices  = window.speechSynthesis.getVoices();
+            const FEMALE  = ['anna','petra','jana','female','marie','hannah','sarah','lena','lea','nina','klara'];
+            let voice = voices.find(v => v.lang.startsWith('de') && !FEMALE.some(k => v.name.toLowerCase().includes(k)));
+            if (!voice) voice = voices.find(v => v.lang.startsWith('de'));
+            if (voice) utter.voice = voice;
+            utter.onend   = resolve;
+            utter.onerror = resolve;
+            window.speechSynthesis.speak(utter);
+        });
+    }
+
+    async function speakVerse(text) {
+        if (!text || text === '—') return;
+        setTTSBtnState(true);
+
+        if (piperWorker && piperReady) {
+            const ok = await speakViaPiper(text);
+            if (!ok) await speakViaWebSpeech(text); // Fallback
+        } else {
+            await speakViaWebSpeech(text);
         }
+
+        setTTSBtnState(false);
+    }
+
+    async function ttsNext() {
+        while (ttsAutoPlay) {
+            const text = document.getElementById('germanText')?.textContent?.trim();
+            if (text && text !== '—') await speakVerse(text);
+            if (!ttsAutoPlay) break;
+            if (currentVerseIdx < verses.length - 1) {
+                jumpToVerse(currentVerseIdx + 1);
+                await new Promise(r => setTimeout(r, 200));
+            } else {
+                ttsAutoPlay = false;
+                setTTSBtnState(false);
+                break;
+            }
+        }
+    }
+
+    function toggleTTS(btn) {
+        if (ttsAutoPlay || ttsAudio || window.speechSynthesis?.speaking) { stopTTS(); return; }
         ttsAutoPlay = true;
         player.pause();
+        if (!piperWorker) initPiper();
         ttsNext();
     }
 
