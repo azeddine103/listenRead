@@ -12,6 +12,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="quran.png">
     <link rel="icon" type="image/png" href="quran.png">
+    <script src="https://code.responsivevoice.org/responsivevoice.js?key=FREE"></script>
     <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -828,8 +829,7 @@
 
     // Stop TTS whenever arabic audio starts playing
     player.addEventListener('play', () => {
-        if (window.speechSynthesis?.speaking || ttsAutoPlay) {
-            ttsAutoPlay = false;
+        if (ttsAutoPlay || (window.responsiveVoice?.isPlaying())) {
             stopTTS();
         }
     });
@@ -841,8 +841,7 @@
 
         loadBtn.disabled = true;
         // Stop TTS when new surah is loaded
-        ttsAutoPlay = false;
-        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        stopTTS();
         verses = []; verseTimes = []; currentVerseIdx = -1; currentWordIdx = -1;
         if (wordAudio) { wordAudio.pause(); wordAudio = null; }
 
@@ -963,49 +962,10 @@
     prevBtn.onclick = () => jumpToVerse(currentVerseIdx - 1);
     nextBtn.onclick = () => jumpToVerse(currentVerseIdx + 1);
 
-    // ── Text-to-Speech ────────────────────────────────────────────
+    // ── Text-to-Speech via ResponsiveVoice ──────────────────────
+    // Konsistente deutsche Männerstimme auf allen Geräten (Android, iOS, Windows)
     let ttsAutoPlay = false;
-
-    // ── Beste verfügbare Männerstimme ────────────────────────────
-    // Log all voices to console for debugging
-    function logVoices() {
-        const voices = window.speechSynthesis.getVoices();
-        console.log('=== Verfügbare Stimmen ===');
-        voices.forEach((v,i) => console.log(i, v.name, v.lang, v.localService));
-    }
-    window.speechSynthesis.onvoiceschanged = logVoices;
-
-    function getMaleGermanVoice() {
-        const voices = window.speechSynthesis.getVoices();
-        logVoices();
-
-        // Priority list: explicit male German names
-        const MALE = ['stefan', 'hans', 'markus', 'daniel', 'thomas', 'martin',
-                      'michael', 'google deutsch', 'de-de-neural2-b', 'de-de-neural2-d',
-                      'de-de-wavenet-b', 'de-de-wavenet-d', 'male'];
-        const FEMALE = ['anna', 'petra', 'jana', 'yannick', 'female', 'marie',
-                        'hannah', 'sarah', 'lena', 'lea', 'nina', 'klara'];
-
-        // 1. Explicitly male German
-        let pick = voices.find(v =>
-            v.lang.startsWith('de') && MALE.some(k => v.name.toLowerCase().includes(k))
-        );
-        // 2. German, not female
-        if (!pick) pick = voices.find(v =>
-            v.lang.startsWith('de') && !FEMALE.some(k => v.name.toLowerCase().includes(k))
-        );
-        // 3. Any German
-        if (!pick) pick = voices.find(v => v.lang.startsWith('de'));
-        // 4. Explicit male English as last resort (still sounds male)
-        if (!pick) pick = voices.find(v =>
-            v.lang.startsWith('en') && MALE.some(k => v.name.toLowerCase().includes(k))
-        );
-        // 5. Any voice
-        if (!pick && voices.length) pick = voices[0];
-
-        console.log('Gewählte Stimme:', pick?.name, pick?.lang);
-        return pick;
-    }
+    const RV_VOICE = 'Deutsch Male';  // ResponsiveVoice deutsche Männerstimme
 
     function setTTSBtnState(speaking) {
         const btn = document.getElementById('ttsBtn');
@@ -1023,53 +983,45 @@
     }
 
     function stopTTS() {
-        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        if (window.responsiveVoice) responsiveVoice.cancel();
+        ttsAutoPlay = false;
         setTTSBtnState(false);
     }
 
-    // ── Einen Vers vorlesen, dann onDone() aufrufen ───────────────
     function speakVerse(text, onDone) {
-        window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.lang  = 'de-DE';
-        utter.rate  = 0.88;
-        utter.pitch = 0.75;   // tief = männlich
-
-        const doSpeak = () => {
-            const voice = getMaleGermanVoice();
-            if (voice) utter.voice = voice;
-            utter.onstart = () => setTTSBtnState(true);
-            utter.onend   = () => { setTTSBtnState(false); onDone?.(); };
+        if (!window.responsiveVoice) {
+            // Fallback auf Web Speech API wenn ResponsiveVoice nicht geladen
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.lang = 'de-DE'; utter.rate = 0.88; utter.pitch = 0.75;
+            utter.onend = () => { setTTSBtnState(false); onDone?.(); };
             utter.onerror = () => { setTTSBtnState(false); onDone?.(); };
             window.speechSynthesis.speak(utter);
-        };
-
-        if (window.speechSynthesis.getVoices().length === 0) {
-            window.speechSynthesis.addEventListener('voiceschanged', doSpeak, { once: true });
-        } else {
-            doSpeak();
+            return;
         }
+        responsiveVoice.speak(text, RV_VOICE, {
+            rate: 0.9,
+            pitch: 1,
+            volume: 1,
+            onstart: () => setTTSBtnState(true),
+            onend:   () => { setTTSBtnState(false); onDone?.(); },
+            onerror: () => { setTTSBtnState(false); onDone?.(); }
+        });
     }
 
-    // ── Aktuellen Vers lesen, dann zum nächsten weiterschalten ────
-    // Fix: Text wird VOR jumpToVerse gelesen, damit Vers 2 nicht übersprungen wird
     function ttsNext() {
         if (!ttsAutoPlay) return;
         const text = document.getElementById('germanText')?.textContent?.trim();
         if (!text || text === '—') {
-            // Leerer Vers → direkt weiter
             if (currentVerseIdx < verses.length - 1) {
                 jumpToVerse(currentVerseIdx + 1);
                 setTimeout(ttsNext, 150);
             } else { ttsAutoPlay = false; }
             return;
         }
-        // Erst lesen, DANN erst zum nächsten Vers springen
         speakVerse(text, () => {
             if (!ttsAutoPlay) return;
             if (currentVerseIdx < verses.length - 1) {
                 jumpToVerse(currentVerseIdx + 1);
-                // DOM hat sich aktualisiert — direkt lesen (kein extra setTimeout nötig)
                 ttsNext();
             } else {
                 ttsAutoPlay = false;
@@ -1079,12 +1031,7 @@
     }
 
     function toggleTTS(btn) {
-        if (!window.speechSynthesis) {
-            alert('Text-to-Speech wird von diesem Browser nicht unterstützt.');
-            return;
-        }
-        if (ttsAutoPlay || window.speechSynthesis.speaking) {
-            ttsAutoPlay = false;
+        if (ttsAutoPlay || (window.responsiveVoice && responsiveVoice.isPlaying())) {
             stopTTS();
             return;
         }
@@ -1093,8 +1040,8 @@
         ttsNext();
     }
 
-    prevBtn.addEventListener('click', () => { ttsAutoPlay = false; stopTTS(); });
-    nextBtn.addEventListener('click', () => { ttsAutoPlay = false; stopTTS(); });
+    prevBtn.addEventListener('click', () => { stopTTS(); });
+    nextBtn.addEventListener('click', () => { stopTTS(); });
 
     // ── Audio stoppen beim Verlassen der App ─────────────────────
     // visibilitychange: App in Hintergrund / Tab gewechselt
