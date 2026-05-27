@@ -3,7 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iqraa Koran</title>
+    <title>Iqraa · اقرأ – Koran App</title>
+    <meta name="application-name" content="Iqraa">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Iqraa">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#8a6a1f">
+    <meta name="description" content="Koran lesen mit Tafsir, Transliteration und Audio – اقرأ">
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjogIklxcmFhIFx1MDBiNyBcdTA2MjdcdTA2NDJcdTA2MzFcdTA2MjMgXHUyMDEzIEtvcmFuIEFwcCIsICJzaG9ydF9uYW1lIjogIklxcmFhIiwgImRlc2NyaXB0aW9uIjogIktvcmFuIGxlc2VuIG1pdCBUYWZzaXIsIFRyYW5zbGl0ZXJhdGlvbiB1bmQgQXVkaW8iLCAic3RhcnRfdXJsIjogIi4iLCAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwgImJhY2tncm91bmRfY29sb3IiOiAiIzJjMjQxNSIsICJ0aGVtZV9jb2xvciI6ICIjOGE2YTFmIiwgIm9yaWVudGF0aW9uIjogInBvcnRyYWl0IiwgImxhbmciOiAiZGUiLCAiaWNvbnMiOiBbeyJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUhacFpYZENiM2c5SWpBZ01DQTFNVElnTlRFeUlqNEtJQ0E4Y21WamRDQjNhV1IwYUQwaU5URXlJaUJvWldsbmFIUTlJalV4TWlJZ2NuZzlJamsySWlCbWFXeHNQU0lqTW1NeU5ERTFJaTgrQ2lBZ1BISmxZM1FnZUQwaU1UWWlJSGs5SWpFMklpQjNhV1IwYUQwaU5EZ3dJaUJvWldsbmFIUTlJalE0TUNJZ2NuZzlJamd3SWlCbWFXeHNQU0lqTVdFeE5qQmtJaTgrQ2lBZ1BISmxZM1FnZUQwaU16SWlJSGs5SWpNeUlpQjNhV1IwYUQwaU5EUTRJaUJvWldsbmFIUTlJalEwT0NJZ2NuZzlJalkwSWlCbWFXeHNQU0lqTW1NeU5ERTFJaTgrQ2lBZ1BIUmxlSFFnZUQwaU1qVTJJaUI1UFNJeU1EQWlJR1p2Ym5RdFptRnRhV3g1UFNKelpYSnBaaUlnWm05dWRDMXphWHBsUFNJeU1EQWlJR1pwYkd3OUlpTTRZVFpoTVdZaUlIUmxlSFF0WVc1amFHOXlQU0p0YVdSa2JHVWlJR1J2YldsdVlXNTBMV0poYzJWc2FXNWxQU0p0YVdSa2JHVWlQdGluMllMWXNkaWpQQzkwWlhoMFBnb2dJRHgwWlhoMElIZzlJakkxTmlJZ2VUMGlNell3SWlCbWIyNTBMV1poYldsc2VUMGljMlZ5YVdZaUlHWnZiblF0YzJsNlpUMGlOeklpSUdacGJHdzlJbkpuWW1Fb01UTTRMREV3Tml3ek1Td3dMallwSWlCMFpYaDBMV0Z1WTJodmNqMGliV2xrWkd4bElpQmtiMjFwYm1GdWRDMWlZWE5sYkdsdVpUMGliV2xrWkd4bElqNXBjWEpoWVR3dmRHVjRkRDRLUEM5emRtYysiLCAic2l6ZXMiOiAiYW55IiwgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIsICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSJ9XSwgImNhdGVnb3JpZXMiOiBbImVkdWNhdGlvbiIsICJib29rcyIsICJyZWxpZ2lvbiJdfQ==">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj4KICA8cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9Ijk2IiBmaWxsPSIjMmMyNDE1Ii8+CiAgPHJlY3QgeD0iMTYiIHk9IjE2IiB3aWR0aD0iNDgwIiBoZWlnaHQ9IjQ4MCIgcng9IjgwIiBmaWxsPSIjMWExNjBkIi8+CiAgPHJlY3QgeD0iMzIiIHk9IjMyIiB3aWR0aD0iNDQ4IiBoZWlnaHQ9IjQ0OCIgcng9IjY0IiBmaWxsPSIjMmMyNDE1Ii8+CiAgPHRleHQgeD0iMjU2IiB5PSIyMDAiIGZvbnQtZmFtaWx5PSJzZXJpZiIgZm9udC1zaXplPSIyMDAiIGZpbGw9IiM4YTZhMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPtin2YLYsdijPC90ZXh0PgogIDx0ZXh0IHg9IjI1NiIgeT0iMzYwIiBmb250LWZhbWlseT0ic2VyaWYiIGZvbnQtc2l6ZT0iNzIiIGZpbGw9InJnYmEoMTM4LDEwNiwzMSwwLjYpIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5pcXJhYTwvdGV4dD4KPC9zdmc+">
     <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -223,6 +232,18 @@
         .quick-copy-btn:hover { color: var(--gold); background: var(--gold-dim); border-color: var(--gold); }
         .quick-copy-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
         .quick-copy-btn.copied { color: var(--green); border-color: var(--green); background: rgba(28,107,58,0.08); }
+        /* PWA Install Banner */
+        .install-banner { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); z-index: 600; background: var(--card); border: 1px solid var(--border2); border-radius: 20px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); width: calc(100% - 32px); max-width: 420px; transition: bottom 0.4s cubic-bezier(0.22,1,0.36,1); }
+        .install-banner.visible { bottom: 20px; }
+        .install-banner-icon { font-size: 32px; flex-shrink: 0; }
+        .install-banner-text { flex: 1; }
+        .install-banner-title { font-family: var(--font-body); font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+        .install-banner-sub { font-family: var(--font-ui); font-size: 11px; color: var(--muted2); }
+        .install-banner-btn { background: linear-gradient(135deg, var(--gold), var(--gold2)); color: white; border: none; border-radius: 10px; padding: 8px 14px; font-family: var(--font-body); font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: opacity 0.2s; }
+        .install-banner-btn:hover { opacity: 0.9; }
+        .install-banner-dismiss { background: none; border: none; color: var(--muted2); cursor: pointer; font-size: 18px; padding: 4px; flex-shrink: 0; line-height: 1; transition: color 0.2s; }
+        .install-banner-dismiss:hover { color: var(--text); }
+
         /* Info-Panel */
         .info-overlay { display: none; position: fixed; inset: 0; z-index: 500; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(3px); }
         .info-overlay.open { display: flex; animation: fadeIn 0.25s ease; }
@@ -711,6 +732,15 @@
     // GERMAN TAFSIR DATA (from PDF: Tafsir Al-Quran Al-Karim by Abu-r-Rida')
     // GERMAN TAFSIR DATA (from PDF: Tafsir Al-Quran Al-Karim by Abu-r-Rida')
     const GERMAN_TAFSIR = {
+        "1": {
+            "1": `Die Basmala (Bismillah) lehrt den Gläubigen, alle Handlungen mit dem Namen Allahs zu beginnen. 'Allah' ist der Eigenname des Schöpfers. 'Ar-Rahmān' bezeichnet die umfassende, allgemeine Barmherzigkeit Allahs, die alle Geschöpfe (Gläubige und Ungläubige) im Diesseits umfasst. 'Ar-Rahīm' bezeichnet die besondere, spezifische Barmherzigkeit Allahs, die nur den Gläubigen im Jenseits zuteilwird. Die Basmala ist ein Zeichen der Baraka (Segen) und der Abhängigkeit von Allah.`,
+            "2": `Das Lob (Ḥamd) ist eine Aussage über die Vollkommenheit Allahs mit Liebe und Verehrung. Es umfasst alle Arten des Lobes und der Dankbarkeit. 'Rabb' bedeutet Schöpfer, Versorger, Erhalter und Verwalter aller Geschöpfe. 'Al-ʿĀlamīn' bezeichnet alle existierenden Dinge – die Himmel, die Erde, die Menschen, die Dschinn, die Engel, die Tiere – alles, was es außer Allah gibt. Allah ist der alleinige Herr über alle Welten.`,
+            "3": `Die beiden Namen der Barmherzigkeit (Ar-Rahmān und Ar-Rahīm) werden nach dem Namen 'Rabb' wiederholt, um den Gläubigen zu zeigen, dass die Barmherzigkeit Allahs Seine Herrschaft umfasst. Die Strafe (ʿAdhāb) für die Ungläubigen geschieht ebenfalls aufgrund von Barmherzigkeit – um das Böse zu bestrafen und das Gute zu belohnen. Die Wiederholung betont die Größe von Allahs Barmherzigkeit.`,
+            "4": `Das Gericht (Dīn) findet am Tag der Auferstehung (Yawm al-Qiyāma) statt. An diesem Tag wird Allah allein die vollständige Herrschaft (Mulk) über alle Geschöpfe haben. Kein Mensch, kein König, kein Prophet wird etwas zu sagen haben, es sei denn mit Allahs Erlaubnis. Die Herrschaft Allahs an diesem Tag ist die vollkommene, gerechte Herrschaft. Die Erwähnung des Gerichtstages spornt den Gläubigen an, gute Taten zu tun und Sünden zu vermeiden.`,
+            "5": `Dies ist der Vers des reinen Monotheismus (Tawḥīd). 'Naʿbudu' (Wir dienen) umfasst alle Arten der Anbetung – Gebet (Ṣalāt), Fasten (Ṣiyām), Bittgebet (Duʿā'), Hoffnung (Rajā'), Furcht (Khawf), Vertrauen (Tawakkul), Liebe (Maḥabba) und alle anderen Formen der Hingabe. 'Nastaʿīn' (Wir bitten um Hilfe) bedeutet, dass wir Allah um Hilfe bei der Anbetung und bei allen anderen Angelegenheiten des Lebens bitten. Die Anbetung (ʿIbāda) und die Bitte um Hilfe (Istiʿāna) sind ausschließlich Allah vorbehalten. Die Wiederholung von 'Iyyāka' (Dir allein) betont die Exklusivität (Ikhtiṣāṣ).`,
+            "6": `Die Führung (Hidāya) umfasst zwei Dinge: 1. Die Rechtleitung zur Wahrheit (ʿIlman) – Wissen über den richtigen Glauben. 2. Die Rechtleitung zur Tat (ʿAmalan) – die Fähigkeit, nach diesem Wissen zu handeln. Der 'gerade Weg' (Ṣirāṭ al-Mustaqīm) ist der klare, deutliche Weg ohne Abzweigungen, der direkt zu Allah und ins Paradies führt. Dieser Weg ist der Islam – die Religion des Tawḥīd und der Sunnah. Der Gläubige bittet Allah, ihn auf diesem Weg zu führen und ihn nicht davon abweichen zu lassen.`,
+            "7": `Dies ist eine Erläuterung des 'geraden Weges'. Die Empfänger von Allahs Gnade (Anʿamta ʿAlaihim) sind die Propheten (Nabiyyūn), die Wahrhaftigen (Ṣiddīqūn), die Märtyrer (Shuhadā') und die Rechtschaffenen (Ṣāliḥūn). 'Al-Maghḍūbi ʿAlaihim' sind diejenigen, die den Zorn Allahs erregt haben – die Juden (Yahūd), die das Wissen hatten, aber nicht danach handelten. 'Aḍ-Ḍāllīn' sind die Irregehenden – die Christen (Naṣārā), die handelten, aber ohne das richtige Wissen (oder die, die weder Wissen noch Tat haben). Der Gläubige bittet Allah, nicht zu diesen Gruppen zu gehören.`,
+        },
         "10": {
             "1": `Diese eingangs erwähnten Buchstaben (Alif, Lām, Rā) gehören zu den 'mutashābihāt' (den vieldeutigen Versen), deren genaue Bedeutung nur Allah kennt. Sie dienen jedoch als Beweis für die Herausforderung (Tahaddi) an die Araber, dass der Quran aus diesen Buchstaben besteht, die sie selbst verwenden, sie aber keine Nachahmung davon hervorbringen können. 'Tilka Āyāt al-Kitāb al-Hakīm' – Dies sind die Verse des weisen Buches, das die Wahrheit enthält, frei von Widersprüchen, und das Rechtsurteile (Ahkām) klar festlegt. Es ist weise (Hakīm) in seinen Worten und weise in seinen Handlungen.`,
             "2": `Die Ungläubigen von Quraish wunderten sich darüber, dass Allah einem Menschen (Muhammad) Offenbarung (Wahy) zukommen ließ. In ihrer Arroganz hielten sie es für unwürdig, dass ein Mensch Prophet sein sollte. Aber das ist keine Überraschung, denn Allah hat immer Menschen zu Propheten gewählt. Die Aufgabe des Propheten ist es, zu warnen (Andhir) und frohe Botschaft (Bushra) zu bringen. Die frohe Botschaft ist das 'Qadama Ṣidq' – ein vorbereiteter Platz der Wahrheit und Ehre bei Allah, d.h. das Paradies und die Belohnung für frühere gute Taten. Die Ungläubigen jedoch beschuldigten den Propheten der Zauberei (Sihr) – eine typische Reaktion derer, die die Wahrheit nicht akzeptieren wollen.`,
@@ -4397,6 +4427,85 @@
 
     // Vers des Tages beim Start laden
     loadVerseOfDay();
+
+    // ── PWA SERVICE WORKER ──────────────────────────────────────────────────
+    (function() {
+        if (!('serviceWorker' in navigator)) return;
+        const swCode = `
+const CACHE = 'iqraa-v1';
+const URLS = [self.location.href.replace('sw.js','iqraa_koran_tafsir_fixed.html')];
+
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(URLS)));
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', e => {
+  e.waitUntil(caches.keys().then(keys =>
+    Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+  ));
+  self.clients.claim();
+});
+
+self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return;
+  e.respondWith(
+    caches.match(e.request).then(cached => {
+      const net = fetch(e.request).then(res => {
+        if (res.ok) caches.open(CACHE).then(c => c.put(e.request, res.clone()));
+        return res;
+      }).catch(() => cached);
+      return cached || net;
+    })
+  );
+});
+`;
+        const blob = new Blob([swCode], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(blob);
+        navigator.serviceWorker.register(swUrl).then(reg => {
+            console.log('[Iqraa PWA] Service Worker registriert:', reg.scope);
+        }).catch(err => console.log('[Iqraa PWA] SW Fehler:', err));
+    })();
+
+    // ── PWA INSTALL PROMPT ──────────────────────────────────────────────────
+    let deferredPrompt = null;
+    const installBanner = document.getElementById('installBanner');
+    const installBtn    = document.getElementById('installBtn');
+    const installDismiss= document.getElementById('installDismiss');
+
+    window.addEventListener('beforeinstallprompt', e => {
+        e.preventDefault();
+        deferredPrompt = e;
+        if (installBanner) installBanner.classList.add('visible');
+    });
+
+    if (installBtn) installBtn.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        installBanner.classList.remove('visible');
+    });
+
+    if (installDismiss) installDismiss.addEventListener('click', () => {
+        installBanner.classList.remove('visible');
+        localStorage.setItem('iqraa_install_dismissed', '1');
+    });
+
+    window.addEventListener('appinstalled', () => {
+        installBanner.classList.remove('visible');
+        setStatus('App installiert! ✓ · تم تثبيت التطبيق', 'success');
+    });
 </script>
+
+<div class="install-banner" id="installBanner">
+    <div class="install-banner-icon">📖</div>
+    <div class="install-banner-text">
+        <div class="install-banner-title">Iqraa installieren · تثبيت اقرأ</div>
+        <div class="install-banner-sub">App zum Startbildschirm hinzufügen – offline nutzbar</div>
+    </div>
+    <button class="install-banner-btn" id="installBtn">Installieren</button>
+    <button class="install-banner-dismiss" id="installDismiss" title="Schließen">×</button>
+</div>
 </body>
 </html>
